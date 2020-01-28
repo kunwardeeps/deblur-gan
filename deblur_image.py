@@ -7,6 +7,14 @@ import os
 from deblurgan.model import generator_model
 from deblurgan.utils import load_image, deprocess_image, preprocess_image
 
+from flask import Flask, flash, request, redirect, url_for
+from werkzeug.utils import secure_filename
+
+UPLOAD_FOLDER = 'images/'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 def deblur(weight_path, input_dir, output_dir):
 	g = generator_model()
@@ -24,6 +32,10 @@ def deblur(weight_path, input_dir, output_dir):
 	        im = Image.fromarray(output.astype(np.uint8))
 	        im.save(os.path.join(output_dir, image_name))
 
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 @click.command()
 @click.option('--weight_path', help='Model weight')
@@ -32,6 +44,35 @@ def deblur(weight_path, input_dir, output_dir):
 def deblur_command(weight_path, input_dir, output_dir):
     return deblur(weight_path, input_dir, output_dir)
 
+@app.route("/")
+def upload_form():
+	return '''
+    <!doctype html>
+    <title>Upload new File</title>
+    <h1>Upload new File</h1>
+    <form method=post enctype=multipart/form-data>
+      <input type=file name=file>
+      <input type=submit value=Upload>
+    </form>
+    '''
+
+@app.route('/', methods=['POST'])
+def upload_file():
+	# check if the post request has the file part
+	if 'file' not in request.files:
+		flash('No file part')
+		return redirect(request.url)
+	file = request.files['file']
+	# if user does not select file, browser also
+	# submit an empty part without filename
+	if file.filename == '':
+		flash('No selected file')
+		return redirect(request.url)
+	if file and allowed_file(file.filename):
+		filename = secure_filename(file.filename)
+		file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+		return 'Success'
+	return 'Error!'
 
 if __name__ == "__main__":
-    deblur_command()
+    app.run()
