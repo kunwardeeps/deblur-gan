@@ -26,10 +26,8 @@ def deblur(weight_path, input_dir, output_dir):
 	    generated = np.array([deprocess_image(img) for img in generated_images])
 	    x_test = deprocess_image(x_test)
 	    for i in range(generated_images.shape[0]):
-	        x = x_test[i, :, :, :]
 	        img = generated[i, :, :, :]
-	        output = np.concatenate((x, img), axis=1)
-	        im = Image.fromarray(output.astype(np.uint8))
+	        im = Image.fromarray(img.astype(np.uint8))
 	        im.save(os.path.join(output_dir, image_name))
 
 def allowed_file(filename):
@@ -67,12 +65,13 @@ def upload_file():
 	# submit an empty part without filename
 	if file.filename == '':
 		flash('No selected file')
-		return redirect(request.url)
+		return {'error': 'No selected file'}, 404
 	if file and allowed_file(file.filename):
 		filename = secure_filename(file.filename)
 		file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-		return 'Success'
-	return 'Error!'
+		deblur('generator.h5', 'images', 'output')
+		return 'Success', 200
+	return {'error': 'Generic Error!'}, 404
 
 if __name__ == "__main__":
     app.run()
