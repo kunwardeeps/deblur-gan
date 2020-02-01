@@ -59,6 +59,7 @@ def upload_form():
 
 @app.route("/clear")
 def clear_files():
+	clear_session()
 	files = glob.glob('images/*')
 	for f in files:
 		os.remove(f)
