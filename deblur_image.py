@@ -7,7 +7,7 @@ import os
 from deblurgan.model import generator_model
 from deblurgan.utils import load_image, deprocess_image, preprocess_image
 
-from flask import Flask, flash, request, redirect, url_for
+from flask import Flask, flash, request, redirect, url_for, send_file
 from werkzeug.utils import secure_filename
 
 UPLOAD_FOLDER = 'images/'
@@ -70,7 +70,7 @@ def upload_file():
 		filename = secure_filename(file.filename)
 		file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 		deblur('generator.h5', 'images', 'output')
-		return 'Success', 200
+		return send_file('output/' + filename)
 	return {'error': 'Generic Error!'}, 404
 
 if __name__ == "__main__":
