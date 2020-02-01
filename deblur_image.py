@@ -8,6 +8,8 @@ import glob
 from deblurgan.model import generator_model
 from deblurgan.utils import load_image, deprocess_image, preprocess_image
 
+from keras.backend import clear_session
+
 from flask import Flask, flash, request, redirect, url_for, send_file
 from werkzeug.utils import secure_filename
 
@@ -81,6 +83,7 @@ def upload_file():
 		filename = secure_filename(file.filename)
 		file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 		deblur('generator.h5', 'images', 'output')
+		clear_session()
 		return send_file('output/' + filename)
 	return {'error': 'Generic Error!'}, 404
 
