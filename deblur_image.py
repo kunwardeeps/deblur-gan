@@ -2,6 +2,7 @@ import numpy as np
 from PIL import Image
 import click
 import os
+import glob
 
 
 from deblurgan.model import generator_model
@@ -54,6 +55,16 @@ def upload_form():
     </form>
     '''
 
+@app.route("/clear")
+def clear_files():
+	files = glob.glob('images/*')
+	for f in files:
+		os.remove(f)
+	files = glob.glob('output/*')
+	for f in files:
+		os.remove(f)
+	return 'success'
+
 @app.route('/', methods=['POST'])
 def upload_file():
 	# check if the post request has the file part
@@ -74,4 +85,5 @@ def upload_file():
 	return {'error': 'Generic Error!'}, 404
 
 if __name__ == "__main__":
+	# app.run()
     app.run(host= '0.0.0.0')
