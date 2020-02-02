@@ -10,7 +10,7 @@ from deblurgan.utils import load_image, deprocess_image, preprocess_image
 
 from keras.backend import clear_session
 
-from flask import Flask, flash, request, redirect, url_for, send_file
+from flask import Flask, flash, request, redirect, url_for, send_file, render_template
 from werkzeug.utils import secure_filename
 
 UPLOAD_FOLDER = 'images/'
@@ -47,15 +47,7 @@ def deblur_command(weight_path, input_dir, output_dir):
 
 @app.route("/")
 def upload_form():
-	return '''
-    <!doctype html>
-    <title>Upload new File</title>
-    <h1>Upload new File</h1>
-    <form method=post enctype=multipart/form-data>
-      <input type=file name=file>
-      <input type=submit value=Upload>
-    </form>
-    '''
+	return render_template('home.html')
 
 @app.route("/clear")
 def clear_files():
